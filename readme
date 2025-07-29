@@ -1,0 +1,17 @@
+## Setting up the project
+
+### JavaFX
+
+To run the project with JavaFX, you need to set up the module path correctly in IntelliJ IDEA:
+
+1. Open **Run > Edit Configurations**.
+2. Select the existing run configuration and locate the **VM Options** field.
+3. Add the following option, adjusting the path to match your JavaFX SDK installation:
+
+  --module-path "C:\path\to\javafx-sdk-23.0.1\lib" --add-modules javafx.controls,javafx.fxml
+
+### Run without GUI
+
+1. Open pom.xml.
+2. Scroll until you see <options> in configuration.
+3. Change the NoGui option to true for program to run in terminal only.
