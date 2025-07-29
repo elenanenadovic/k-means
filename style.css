@@ -1,0 +1,54 @@
+
+
+.button {
+    -fx-background-color: #2A2A2A;
+    -fx-text-fill: #888888;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 4px 16px;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0.2, 0, 2);
+    -fx-cursor: hand;
+    -fx-pref-height: 40px;
+}
+
+.button:hover {
+    -fx-background-color: #e0e0e0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0.3, 0, 3);
+}
+
+.button:pressed {
+    -fx-background-color: #d0d0d0;
+    -fx-effect: none;
+}
+
+.root {
+    -fx-background-color: #1E1E1E;
+}
+.text-field {
+    -fx-background-color: #2A2A2A;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8px;
+    -fx-background-radius: 12px;
+    -fx-prompt-text-fill: #888888;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-cursor: text;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0.3, 0, 2);
+}
+
+.text-field:focused {
+    -fx-background-color: #333333;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0.4, 0, 3);
+    -fx-prompt-text-fill: transparent;
+}
+
+.stack-pane {
+    -fx-background-radius: 50px;
+}
+
+
+
+
+
