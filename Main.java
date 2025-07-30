@@ -123,19 +123,21 @@ public class Main extends Application {
 
         System.out.println("Number of cycles passed: " + numberOfCycles);
 
+        /*
         for(int i = 0; i < numClusters; i++) {
             System.out.println("Cluster " + i + ": " + "la " + centroids[i].la + ", lo " + centroids[i].lo);
         }
-
+    */
         if(noGuiRun == false){
             drawing(locations, centroids, mapView);
         }
+        /*
         else{
             for(int i = 0; i < numClusters; i++){
                 System.out.println("Centroid: " + i +1  + ": " + centroids[i].la + ", lo " + centroids[i].lo);
             }
         }
-
+`*/
         return centroids;
     }
 
@@ -277,6 +279,73 @@ public class Main extends Application {
         }
     }
 
+    // --- paste these inside class Main, after buildDataset(...) and before start(...) ---
+
+    // Runs one k-means job and returns runtime in milliseconds (no GUI work).
+    static long runOnce(Location2[] base, int numAccumulation, int numClusters) {
+        double maxCap = maxCapacity(base);                    // max capacity from dataset
+        Location2[] veciniz = buildDataset(base, numAccumulation, maxCap); // build set
+
+        // Convert to Location[] (like in getLocations)
+        Location[] pts = new Location[numAccumulation];
+        for (int i = 0; i < numAccumulation; i++) {
+            Location2 s = veciniz[i];
+            pts[i] = new Location(s.name, s.capacity, s.la, s.lo, generateRandomColor());
+        }
+
+        MapView dummy = new MapView(); // drawing will be skipped when noGuiRun == true
+
+        long t0 = System.nanoTime();
+        kMeans(pts, numClusters, dummy);
+        long t1 = System.nanoTime();
+
+        return (t1 - t0) / 1_000_000L; // ms
+    }
+
+    // Averages runtime over `repeats` runs.
+    static long averageMillis(Location2[] base, int numAccumulation, int numClusters, int repeats) {
+        long sum = 0;
+        for (int r = 0; r < repeats; r++) {
+            sum += runOnce(base, numAccumulation, numClusters);
+        }
+        return Math.round(sum / (double) repeats);
+    }
+
+    // TEST A: limit clusters (fix clusters; grow accumulation by 500)
+    static void benchmark_LimitClusters(Location2[] base) {
+        final int fixedClusters = 20;
+        final int repeats = 3;
+        final int startAccum = 500;
+        final int step = 500;
+        final long stopThresholdMs = 2L * 60L * 1000L; // ~2 minutes
+
+        System.out.println("config,accumulation,clusters,avg_ms");
+        for (int accum = startAccum, cfg = 1; ; accum += step, cfg++) {
+            long avg = averageMillis(base, accum, fixedClusters, repeats);
+            System.out.println(cfg + "," + accum + "," + fixedClusters + "," + avg);
+            if (avg >= stopThresholdMs) break;
+        }
+    }
+
+    // TEST B: limit accumulation (fix accumulation; grow clusters by 5)
+    static void benchmark_LimitAccum(Location2[] base) {
+        final int accumulation = 30_000;
+        final int startClusters = 5;
+        final int step = 5;
+        final int repeats = 3;
+        final int clusterCap = accumulation / 3;
+        final long stopThresholdMs = 2L * 60L * 1000L; // ~2 minutes
+
+        System.out.println("config,accumulation,clusters,avg_ms");
+        int cfg = 1;
+        for (int k = startClusters; k <= clusterCap; k += step, cfg++) {
+            long avg = averageMillis(base, accumulation, k, repeats);
+            System.out.println(cfg + "," + accumulation + "," + k + "," + avg);
+            if (avg >= stopThresholdMs) break;
+        }
+    }
+
+
     @Override
     public void start(Stage stage) throws IOException {
 
@@ -367,6 +436,14 @@ public class Main extends Application {
 
     public static void main(String[] args) throws IOException {
          noGuiRun = Boolean.parseBoolean(System.getProperty("nogui", "false"));
+
+        if (Boolean.parseBoolean(System.getProperty("bench", "false"))) {
+            noGuiRun = true;
+            Location2[] base = gson();
+            benchmark_LimitClusters(base);
+            benchmark_LimitAccum(base);
+            return;
+        }
 
         if (noGuiRun) {
             noGuiRun();
